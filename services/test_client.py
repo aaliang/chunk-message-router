@@ -6,7 +6,7 @@ if __name__ == '__main__':
     
     url = "http://localhost:5000/network_request"
     
-    recipients = [str(x) for x in xrange(50)]
+    recipients = [str(x) for x in xrange(49)]
     
     
     value = {'message' : 'SendHub Rocks!',

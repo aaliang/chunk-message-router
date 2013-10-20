@@ -19,3 +19,19 @@ class MessageRelays(object):
     
     ALL_DESCENDING = (SUPER, LARGE, MEDIUM, SMALL,)
     """Tuple of all the known message relay types. Sorted, in ascending order, by throughput size"""
+    
+    __throughput_lookup = dict((k.throughput, k) for k in ALL_DESCENDING)
+    
+    @staticmethod
+    def get_relay_type_by_throughput(throughput):
+        """
+            Returns the MessageRelay corresponding to the throughput if it exists.
+            If it does not exist, return None
+
+            @type size: IntType
+            @rtype: MessageRelay
+        """
+        if throughput in MessageRelays.__throughput_lookup:
+            return MessageRelays.__throughput_lookup[throughput]
+        else:
+            return None
