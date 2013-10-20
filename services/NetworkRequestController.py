@@ -1,4 +1,3 @@
-from services.AbstractController import AbstractController
 from utils.MessageRelays import MessageRelays
 from utils.SubnetUtil import SubnetUtil
 from types import ListType, StringType
