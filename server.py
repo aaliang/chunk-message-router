@@ -6,7 +6,7 @@ from types import ListType, UnicodeType
     
 app = Flask(__name__)
 
-@app.route('/network_request')
+@app.route('/test')
 def hello_world():
     return 'Hello World!'
 
