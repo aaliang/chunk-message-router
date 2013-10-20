@@ -6,7 +6,7 @@ if __name__ == '__main__':
     
     url = "http://localhost:5000/network_request"
     
-    recipients = [str(x) for x in xrange(5000)]
+    recipients = [str(x) for x in xrange(50)]
     
     
     value = {'message' : 'SendHub Rocks!',
@@ -22,6 +22,8 @@ if __name__ == '__main__':
         f = urllib2.urlopen(req)
         response = f.read()
         f.close()
+        print response
+
         
     except Exception, e:
         print e

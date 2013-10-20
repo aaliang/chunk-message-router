@@ -8,16 +8,56 @@ class NetworkRequestController(AbstractController):
     @staticmethod
     def gen_ip(subnet):
         """
+            Generator yielding all possible ip values on a given subnet mask
+        
             @type subnet: StringType
         """
+
         assert isinstance(subnet, StringType)
         subnet_split = subnet.split("/")
-        sig_bits = subnet_split[1]
-        prefixes = subnet_split[0].split(".")
+        sig_bits = int(subnet_split[1])
+        prefixes = [int(x) for x in subnet_split[0].split(".")]
         
+        len_prefixes = len(prefixes)
+        assert len_prefixes == 4
         
+        cursor_position = sig_bits/8
+        carry_over = sig_bits % 8
+        if carry_over > 0:
+            unmasked_bits = 8-carry_over
+            partial_max = ((1 << (unmasked_bits+1)) - 1) + prefixes[cursor_position]
+        else:
+            partial_max = 255#default max TODO: use constants
         
+        maxes = []
+        for x in xrange(cursor_position):
+            maxes.append(prefixes[x])
         
+        maxes.append(partial_max)
+        
+        for x in xrange(cursor_position+1, len_prefixes):
+            maxes.append(255)
+
+        temp_ip = prefixes[:]
+
+        def rebuild_ip(index, ip_parts, prefixes, maxes):
+            """
+                recursively builds ips according to their prefix and maxes
+            """
+            for i in xrange(prefixes[index], maxes[index]+1):
+                if i == 0:
+                    continue
+                ip_parts[index] = i
+                if index < len_prefixes-1:
+                    for i in rebuild_ip(index+1, ip_parts, prefixes,maxes):
+                        yield i
+                else:
+                    yield ".".join(str(x) for x in temp_ip)
+
+
+        for x in reversed(xrange(cursor_position, len_prefixes)):
+            for ip in rebuild_ip(x, temp_ip, prefixes, maxes):
+                yield ip
 
     @staticmethod
     def handle_routing(message, recipients):
@@ -27,21 +67,33 @@ class NetworkRequestController(AbstractController):
             
             @type message: UnicodeType
             @type recipients: ListType
+            @rtype: UnicodeType
+            @return: the JSON representation of the response object
         """
 
         all_chunks = NetworkRequestController.__get_request_chunks(recipients)
         #all chunks is a dictionary keyed by throughput types. The values are Lists of Lists of recipients.
         routes = []
+
+        try:
+            for tp_class, chunks in all_chunks.items():
+                if len(chunks) > 254:
+                    raise Exception("this is broken")
+                ip_gen = NetworkRequestController.gen_ip(tp_class.subnet_prefix)
+
+                
+                for chunk in chunks:
+                    routes.append({
+                     "ip": ip_gen.next(),
+                     "recipients": chunk
+                     })
+        except Exception, e:
+            print e
         
-        for tp_class, chunk in all_chunks.items():
-            if len(chunk) > 254:
-                raise Exception("this is broken")
-            NetworkRequestController.gen_ip(tp_class.subnet_prefix)
-            routes.append()
-            f = 3
-            
-            
-            
+        
+        return json.dumps({'message': message,
+                'routes': routes
+                })
     
     @staticmethod
     def __get_request_chunks(recipients):
