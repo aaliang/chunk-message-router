@@ -1,3 +1,5 @@
+from types import StringType
+
 class SubnetUtil(object):
     """
         Utility class intended to hold helper methods with dealing with subnets

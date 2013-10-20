@@ -1,7 +1,7 @@
 from utils.MessageRelays import MessageRelays
 from utils.SubnetUtil import SubnetUtil
 from types import ListType, StringType
-import json
+# import json
 
 class NetworkRequestController(object):
     """
@@ -16,8 +16,8 @@ class NetworkRequestController(object):
             
             @type message: UnicodeType
             @type recipients: ListType
-            @rtype: UnicodeType
-            @return: the JSON representation of the response object
+            @rtype: DictType
+            @return: the representation of the response object
         """
 
         all_chunks = NetworkRequestController.__get_request_chunks_dp(recipients)
@@ -25,24 +25,20 @@ class NetworkRequestController(object):
         #all chunks is a dictionary keyed by throughput types. The values are Lists of Lists of recipients.
         routes = []
 
-        try:
-            for tp_class, chunks in all_chunks.items():
-                if len(chunks) > 254:
-                    raise Exception("this is broken")
-                ip_generator = SubnetUtil.gen_ip(tp_class.subnet_prefix)
+        for tp_class, chunks in all_chunks.items():
+            if len(chunks) > 254:
+                raise Exception("this is broken")
+            ip_generator = SubnetUtil.gen_ip(tp_class.subnet_prefix)
 
-                for chunk in chunks:
-                    routes.append({
-                     "ip": ip_generator.next(),
-                     "recipients": chunk
-                     })
-        except Exception, e:
-            print e
+            for chunk in chunks:
+                routes.append({
+                 "ip": ip_generator.next(),
+                 "recipients": chunk
+                 })
         
-        
-        return json.dumps({'message': message,
+        return {'message': message,
                 'routes': routes
-                })
+                }
         
     @staticmethod
     def __get_request_chunks_dp(recipients):

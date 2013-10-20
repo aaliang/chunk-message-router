@@ -5,8 +5,11 @@ import json
 if __name__ == '__main__':
     
     url = "http://localhost:5000/network_request"
+#     url = "http://guarded-plains-1377.herokuapp.com/network_request"
+
     
-    recipients = [str(x) for x in xrange(49)]
+    
+    recipients = [str(x) for x in xrange(50)]
     
     
     value = {'message' : 'SendHub Rocks!',
