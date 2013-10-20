@@ -5,7 +5,7 @@ from types import ListType, StringType
 
 class NetworkRequestController(object):
     """
-        NetworkRequestController
+        Static class containing methods to handle network_request API requests
     """
 
     @staticmethod
@@ -19,15 +19,14 @@ class NetworkRequestController(object):
             @rtype: DictType
             @return: the representation of the response object
         """
+        #all chunks is a dictionary keyed by throughput types. 
+        #the values are Lists of Lists of recipients.
 
         all_chunks = NetworkRequestController.__get_request_chunks_dp(recipients)
-#         all_chunks = NetworkRequestController.__get_request_chunks_greedy(recipients)
-        #all chunks is a dictionary keyed by throughput types. The values are Lists of Lists of recipients.
         routes = []
-
         for tp_class, chunks in all_chunks.items():
-            if len(chunks) > 254:
-                raise Exception("this is broken")
+#             if len(chunks) > 255:
+#                 raise Exception("this is broken")
             ip_generator = SubnetUtil.gen_ip(tp_class.subnet_prefix)
 
             for chunk in chunks:
@@ -48,11 +47,11 @@ class NetworkRequestController(object):
         """
         assert isinstance(recipients, ListType)
         
-        states = [None for _ in xrange(len(recipients) + 1)]
-        states[0] = 0
+        sum_tableau = [None for _ in xrange(len(recipients) + 1)]
+
         throughput_sizes = set(x.throughput for x in MessageRelays.ALL_DESCENDING)
         
-        def min_key(throughput_set):
+        def min_subset(throughput_set):
             """
                 Inner function to be used as the key function for min(). THe size of the object
                 {throughput_set} is determined by summing the values
@@ -66,28 +65,33 @@ class NetworkRequestController(object):
             else:
                 return float('inf')
 
-        for i, state in enumerate(states[1:]):
+        for i, state in enumerate(sum_tableau[1:]):
             
             index = i+1
             if index in throughput_sizes:
-                states[index] = {MessageRelays.get_relay_type_by_throughput(index): 1}
+                sum_tableau[index] = {MessageRelays.get_relay_type_by_throughput(index): 1}
             else:
-                slice = [states[i-x.throughput+1] for x in MessageRelays.ALL_DESCENDING]
-                minimal_sum = min(slice, key=min_key)
+                #for each throughput size, we want to know the "cost" of state[sum] - throughput size
+                candidate_cell = [sum_tableau[i-x.throughput+1] for x in MessageRelays.ALL_DESCENDING if i-x.throughput+1 >= 0]
+                minimal_sum = min(candidate_cell, key=min_subset)
+                #since by definition, the incremental step we take is equal to one unit, we just need get the
+                #minimum cell
 
-                states[index] = minimal_sum.copy()
-#                 throughput_val = index - sum(x for x in minimal_sum.values())
+                sum_tableau[index] = minimal_sum.copy()
                 throughput_val =  index - sum(k.throughput * v for (k,v) in minimal_sum.items())
                 relay_type = MessageRelays.get_relay_type_by_throughput(throughput_val)
                 assert relay_type
-                if relay_type in states[index]:
-                    states[index][relay_type] += 1
+                if relay_type in sum_tableau[index]:
+                    sum_tableau[index][relay_type] += 1
                 else:
-                    states[index][relay_type] = 1
-        
-        chunk_count = states[len(states)-1]
+                    sum_tableau[index][relay_type] = 1
+
+        #the last cell in sum_tableau contains the abstraction for doing the chunking
+        chunk_count = sum_tableau[len(sum_tableau)-1]
         all_chunks = {}
         start_index = 0
+        
+        #start dividing up the recipients into chunks
         for rtype, num  in chunk_count.items():
             chunks_array = []
             for i in xrange(num):
@@ -103,7 +107,7 @@ class NetworkRequestController(object):
         """
             Uses a greedy approach to chunk up recipients into message relay groups.
             In the general case, this is an approximation. However it also finds the
-            solution in O(1).
+            solution in O(1) time. Note: this is not used
         """
         assert isinstance(recipients, ListType)
         

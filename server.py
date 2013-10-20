@@ -1,6 +1,6 @@
-from flask import Flask, request #@UnresolvedImport
+from flask import Flask, request, abort, jsonify #@UnresolvedImport
 from services.NetworkRequestController import NetworkRequestController
-from types import ListType, UnicodeType, DictType
+from types import ListType, UnicodeType, DictType, IntType
 import logging
 import os
 import json
@@ -17,25 +17,33 @@ def network_request():
     recipients = request.json['recipients']
     message = request.json['message']
  
-    if isinstance(recipients, ListType) and isinstance(message, UnicodeType):
+    if isinstance(recipients, ListType) and isinstance(message, UnicodeType) and len(recipients) > 0:
+        if len(set(recipients)) != len(recipients):
+            abort(400)
+        
         try:
             return response_as_json(
-                NetworkRequestController.handle_routing(message, recipients)
+                NetworkRequestController.handle_routing(message, recipients),
+                200
             )
         except Exception, e:
-            logger.error(e.message)
+            logger.debug(e.message, exc_info=1)
             abort(500)
     else:
         abort(400)
-         
 
-def response_as_json(response):
+
+def response_as_json(response, status):
     """
         Returns JSONified representation of the response
     """
     assert isinstance(response, DictType)
-    return json.dumps(response)
-        
+    assert isinstance(status, IntType)
+
+    resp = jsonify(response)
+    resp.status_code = status
+    
+    return resp
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
