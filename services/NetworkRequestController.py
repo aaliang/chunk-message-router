@@ -4,7 +4,7 @@ from utils.SubnetUtil import SubnetUtil
 from types import ListType, StringType
 import json
 
-class NetworkRequestController(AbstractController):
+class NetworkRequestController(object):
     """
         NetworkRequestController
     """
