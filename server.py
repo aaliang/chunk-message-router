@@ -17,9 +17,15 @@ def network_request():
     recipients = request.json['recipients']
     message = request.json['message']
  
-    if isinstance(recipients, ListType) and isinstance(message, UnicodeType) and len(recipients) > 0:
+    if isinstance(recipients, ListType) and isinstance(message, UnicodeType):
+        len_recipients = len(recipients)
+        if len_recipients == 0 or len_recipients > NetworkRequestController.MAX_RECIPIENTS:
+            try:
+                return ("Invalid Length", 400, {'message': 'Invalid length for input "recipients"'})
+            except Exception, e:
+                print e
         if len(set(recipients)) != len(recipients):
-            abort(400)
+            return ("Invalid", 400, {'message': 'Invalid input "recipients", not unique'})
         
         try:
             return response_as_json(
@@ -30,7 +36,7 @@ def network_request():
             logger.debug(e.message, exc_info=1)
             abort(500)
     else:
-        abort(400)
+        abort(400) #invalid request
 
 
 def response_as_json(response, status):

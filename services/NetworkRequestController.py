@@ -8,6 +8,10 @@ class NetworkRequestController(object):
         Static class containing methods to handle network_request API requests
     """
 
+    MAX_RECIPIENTS = 5000
+    """The maximum amount of recipients the router can handle"""
+
+
     @staticmethod
     def handle_routing(message, recipients):
         """
