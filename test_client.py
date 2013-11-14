@@ -31,7 +31,7 @@ def make_requests_with_n_recipients(num, url):
     """
     recipients = [str(x) for x in xrange(num)]
 
-    data = create_request('SendHub rocks!', recipients)
+    data = create_request('TEST MESSAGE!', recipients)
     return call_api_endpoint(url, data)
 
 def call_api_endpoint(url, data):
@@ -87,7 +87,7 @@ def run_tests():
     #test for 5000 recipients
     
     recipients = range(5000)
-    request = create_request('sendhub rocks!', recipients)
+    request = create_request('TEST MESSAGE!', recipients)
     result = call_api_endpoint(url, request)
     assert result != -1, result
     print result
@@ -97,7 +97,7 @@ def run_tests():
     #test for 983 recipients
     
     recipients = range(983)
-    request = create_request('sendhub rocks!', recipients)
+    request = create_request('TEST MESSAGE!', recipients)
     result = call_api_endpoint(url, request)
     assert result != -1, result
     print result
