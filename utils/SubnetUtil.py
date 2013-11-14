@@ -41,8 +41,6 @@ class SubnetUtil(object):
         #everything to the right of the partial will have a max value of 255
         
         maxes.extend([SubnetUtil.MAXIMUM_IP_BYTE_VALUE for _ in xrange(cursor_position+1, len_prefixes)])
-#         for x in xrange(cursor_position+1, len_prefixes):
-#             maxes.append(SubnetUtil.MAXIMUM_IP_BYTE_VALUE)
 
         def rebuild_ip(index, ip_parts, prefixes, maxes):
             """
