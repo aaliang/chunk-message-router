@@ -29,8 +29,8 @@ class NetworkRequestController(object):
         all_chunks = NetworkRequestController.__get_request_chunks_dp(recipients)
         routes = []
         for tp_class, chunks in all_chunks.items():
-#             if len(chunks) > 255:
-#                 raise Exception("this is broken")
+             if len(chunks) > 255:
+                 raise Exception("this is broken")
             ip_generator = SubnetUtil.gen_ip(tp_class.subnet_prefix)
 
             for chunk in chunks:
@@ -39,7 +39,8 @@ class NetworkRequestController(object):
                  "recipients": chunk
                  })
         
-        return {'message': message,
+        return {
+                'message': message,
                 'routes': routes
                 }
         
