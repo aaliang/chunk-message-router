@@ -6,10 +6,10 @@ from utils.MessageRelays import MessageRelays
 
 
 #pointing to heroku
-#url = "http://guarded-plains-1377.herokuapp.com/network_request"
+#url = "http://guarded-plains-1377.herokuapp.com/send_message/unicast"
 
 #local url
-url = "http://localhost:5000/network_request"
+url = "http://localhost:5000/send_message/unicast"
 
 #hastily created test client to validate quickly certain parts of the app
 #note: using this script is not sufficient in itself to test correctness
