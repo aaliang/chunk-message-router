@@ -10,7 +10,7 @@ app = Flask(__name__)
 logger = logging.getLogger("__name__")
 
 @app.route('/send_message/unicast', methods=['POST'])
-def network_request():
+def route_message_request():
     if not request.json or 'message' not in request.json or 'recipients' not in request.json:
         abort(400)
  
