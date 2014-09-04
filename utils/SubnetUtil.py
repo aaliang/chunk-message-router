@@ -63,7 +63,7 @@ class SubnetUtil(object):
 
     LEAST_SIGNIFICANT_IP_BYTE_INDEX = 3
     """
-        The index of the least significant byte of an ip address if split by the period delimiters
+        The index of the least significant byte of an ip address is split by the period delimiters
         eg:
          10.000.000.001
         [0].[1].[2].[3]
